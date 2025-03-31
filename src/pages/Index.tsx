@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -26,7 +27,7 @@ const HomePage = () => {
           <div className="container grid gap-8 md:grid-cols-2 md:items-center">
             <div className="space-y-6">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                <span className="block text-dreambox-blue">Obiri</span>
+                <span className="block text-dreambox-blue">Smart Learning</span>
                 <span className="block">for Every Student</span>
               </h1>
               <p className="text-lg text-muted-foreground md:text-xl">
@@ -72,7 +73,7 @@ const HomePage = () => {
           <div className="container">
             <div className="mb-12 text-center">
               <h2 className="mb-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                Why Choose DreamBox?
+                Why Choose Obiri?
               </h2>
               <p className="mx-auto max-w-2xl text-muted-foreground">
                 Our adaptive learning platform meets every student where they are and helps them progress at their own pace.
@@ -302,7 +303,7 @@ const HomePage = () => {
               Ready to Transform Learning?
             </h2>
             <p className="mx-auto mb-8 max-w-2xl text-lg opacity-90">
-              Join thousands of students, parents, and educators who are already using DreamBox to enhance their learning experience.
+              Join thousands of students, parents, and educators who are already using Obiri to enhance their learning experience.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button

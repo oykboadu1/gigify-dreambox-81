@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 
@@ -10,10 +9,10 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-gradient-to-r from-dreambox-blue to-dreambox-purple"></div>
-              <span className="text-xl font-bold">DreamBox</span>
+              <span className="text-xl font-bold">Obiri</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-              DreamBox Learning is an adaptive learning platform that provides personalized learning experiences for K-8 students.
+              Obiri Learning is an adaptive learning platform that provides personalized learning experiences for K-8 students.
             </p>
             <div className="mt-6 flex space-x-4">
               <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
@@ -111,7 +110,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} DreamBox Learning, Inc. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Obiri Learning, Inc. All rights reserved.</p>
         </div>
       </div>
     </footer>

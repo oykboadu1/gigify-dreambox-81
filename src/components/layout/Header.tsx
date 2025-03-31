@@ -27,7 +27,7 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-gradient-to-r from-dreambox-blue to-dreambox-purple"></div>
-            <span className="hidden text-xl font-bold sm:inline-block">DreamBox</span>
+            <span className="hidden text-xl font-bold sm:inline-block">Obiri</span>
           </Link>
         </div>
 
@@ -45,7 +45,7 @@ const Header = () => {
                           href="/"
                         >
                           <div className="mb-2 mt-4 text-lg font-medium">
-                            DreamBox Learning
+                            Obiri Learning
                           </div>
                           <p className="text-sm leading-tight text-muted-foreground">
                             Adaptive learning platform that adjusts to each student's skill level
@@ -152,7 +152,7 @@ const Header = () => {
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-gradient-to-r from-dreambox-blue to-dreambox-purple"></div>
-              <span className="text-xl font-bold">DreamBox</span>
+              <span className="text-xl font-bold">Obiri</span>
             </Link>
           </div>
           <button onClick={toggleMenu}>
