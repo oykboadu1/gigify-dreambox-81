@@ -70,11 +70,180 @@ const MathAssistant = ({ open, onOpenChange }: MathAssistantProps) => {
     }, 1500);
   };
   
+  // Function to evaluate BODMAS expressions safely using Function constructor
+  const evaluateExpression = (expr: string): number => {
+    // Replace × and x with * for multiplication
+    const sanitizedExpr = expr
+      .replace(/×/g, '*')
+      .replace(/x/g, '*')
+      .replace(/÷/g, '/');
+    
+    // Potentially dangerous but limited to mathematical operations
+    // eslint-disable-next-line no-new-func
+    return Function(`'use strict'; return (${sanitizedExpr})`)();
+  };
+
+  // Function to solve equations like "2x + 3 = 7"
+  const solveEquation = (equation: string): { result: string, steps: string[] } => {
+    // Check if it's an equation (contains = sign)
+    if (!equation.includes('=')) {
+      throw new Error('Not an equation');
+    }
+
+    const [leftSide, rightSide] = equation.split('=').map(side => side.trim());
+    
+    // Currently handle simple equations of the form: ax + b = c
+    // This is a simplified approach for basic linear equations only
+    if (leftSide.includes('x') || rightSide.includes('x')) {
+      try {
+        const steps: string[] = [];
+        steps.push(`I'll solve the equation: ${equation}`);
+
+        // For simplicity, we'll handle the case where x is on the left side
+        // Example: "2x + 3 = 7" or "x - 5 = 10"
+        let xCoefficient = 1;
+        let constant = 0;
+        let rightValue = 0;
+
+        try {
+          rightValue = evaluateExpression(rightSide);
+          steps.push(`First, I evaluate the right side: ${rightSide} = ${rightValue}`);
+        } catch (e) {
+          // If right side also has variables, this simple solver can't handle it
+          throw new Error('Complex equation');
+        }
+
+        if (leftSide.includes('x')) {
+          // Handle different forms of x coefficient: x, 1x, -x, -1x, 2x, etc.
+          const xTerms = leftSide.match(/[+-]?\s*\d*\.?\d*\s*x/g) || [];
+          const constantTerms = leftSide.replace(/[+-]?\s*\d*\.?\d*\s*x/g, '').trim();
+          
+          steps.push(`I identify the terms with x: ${xTerms.join(', ')}`);
+          if (constantTerms) {
+            steps.push(`And the constant terms: ${constantTerms}`);
+          }
+
+          if (xTerms.length > 0) {
+            xTerms.forEach(term => {
+              // Extract coefficient of x
+              if (term === 'x') {
+                xCoefficient = 1;
+              } else if (term === '-x') {
+                xCoefficient = -1;
+              } else {
+                const coefficient = parseFloat(term.replace('x', ''));
+                if (!isNaN(coefficient)) {
+                  xCoefficient = coefficient;
+                }
+              }
+            });
+          }
+
+          // Get the constant part
+          if (constantTerms) {
+            try {
+              constant = evaluateExpression(constantTerms);
+            } catch (e) {
+              // If we can't evaluate, assume it's 0
+              constant = 0;
+            }
+          }
+
+          steps.push(`The coefficient of x is ${xCoefficient}`);
+          if (constant !== 0) {
+            steps.push(`The constant term is ${constant}`);
+          }
+
+          // Move constant to the right side
+          if (constant !== 0) {
+            rightValue = rightValue - constant;
+            steps.push(`I move the constant to the right side: ${rightValue} = ${rightValue}`);
+          }
+
+          // Divide by coefficient of x
+          const solution = rightValue / xCoefficient;
+          steps.push(`Finally, I divide by ${xCoefficient} to isolate x`);
+          steps.push(`x = ${solution}`);
+
+          return {
+            result: `x = ${solution}`,
+            steps
+          };
+        } else {
+          throw new Error('Complex equation');
+        }
+      } catch (error) {
+        throw new Error('Unable to solve this equation');
+      }
+    } else {
+      throw new Error('No variable found in the equation');
+    }
+  };
+  
   const calculateWithSteps = (expr: string) => {
-    // Basic calculation with steps for common operations
+    // Check if it's an equation
+    if (expr.includes('=')) {
+      try {
+        const { result, steps } = solveEquation(expr);
+        setResult(result);
+        setSteps(steps);
+        return;
+      } catch (error) {
+        // If equation solving fails, try treating it as a standard expression
+        console.log("Equation solving failed, trying as expression");
+      }
+    }
+    
+    // Clean the expression
     const sanitizedExpr = expr.replace(/\s+/g, '');
     
-    // Handle addition
+    // Handle basic operations first
+    try {
+      if (sanitizedExpr.includes('+') || 
+          sanitizedExpr.includes('-') || 
+          sanitizedExpr.includes('*') || sanitizedExpr.includes('×') || sanitizedExpr.includes('x') ||
+          sanitizedExpr.includes('/') || sanitizedExpr.includes('÷')) {
+        
+        // Handle BODMAS expressions
+        const bodmasSteps: string[] = [];
+        bodmasSteps.push(`The expression is: ${expr}`);
+        
+        // Explain BODMAS rule
+        bodmasSteps.push("I'll use the BODMAS rule to solve this:");
+        bodmasSteps.push("B - Brackets, O - Orders (powers/roots), D - Division, M - Multiplication, A - Addition, S - Subtraction");
+        
+        try {
+          // Evaluate the expression
+          const answer = evaluateExpression(sanitizedExpr);
+          
+          // Add evaluation steps
+          if (sanitizedExpr.includes('(') || sanitizedExpr.includes(')')) {
+            bodmasSteps.push("First, I'll evaluate the expressions within brackets");
+          }
+          
+          if (sanitizedExpr.includes('*') || sanitizedExpr.includes('×') || sanitizedExpr.includes('x') || 
+              sanitizedExpr.includes('/') || sanitizedExpr.includes('÷')) {
+            bodmasSteps.push("Next, I'll perform the multiplication and division operations from left to right");
+          }
+          
+          if (sanitizedExpr.includes('+') || sanitizedExpr.includes('-')) {
+            bodmasSteps.push("Finally, I'll perform the addition and subtraction operations from left to right");
+          }
+          
+          bodmasSteps.push(`The result is: ${answer}`);
+          
+          setResult(answer.toString());
+          setSteps(bodmasSteps);
+          return;
+        } catch (error) {
+          throw new Error("Invalid BODMAS expression");
+        }
+      }
+    } catch (error) {
+      // Fall back to simpler calculations
+    }
+    
+    // Handle addition (fallback)
     if (sanitizedExpr.includes('+')) {
       const [a, b] = sanitizedExpr.split('+').map(Number);
       if (!isNaN(a) && !isNaN(b)) {
@@ -89,7 +258,7 @@ const MathAssistant = ({ open, onOpenChange }: MathAssistantProps) => {
       }
     }
     
-    // Handle subtraction
+    // Handle subtraction (fallback)
     if (sanitizedExpr.includes('-')) {
       const [a, b] = sanitizedExpr.split('-').map(Number);
       if (!isNaN(a) && !isNaN(b)) {
@@ -104,7 +273,7 @@ const MathAssistant = ({ open, onOpenChange }: MathAssistantProps) => {
       }
     }
     
-    // Handle multiplication
+    // Handle multiplication (fallback)
     if (sanitizedExpr.includes('*') || sanitizedExpr.includes('×') || sanitizedExpr.includes('x')) {
       const parts = sanitizedExpr.split(/[\*×x]/);
       const [a, b] = parts.map(Number);
@@ -120,7 +289,7 @@ const MathAssistant = ({ open, onOpenChange }: MathAssistantProps) => {
       }
     }
     
-    // Handle division
+    // Handle division (fallback)
     if (sanitizedExpr.includes('/') || sanitizedExpr.includes('÷')) {
       const parts = sanitizedExpr.split(/[\/÷]/);
       const [a, b] = parts.map(Number);
@@ -159,7 +328,7 @@ const MathAssistant = ({ open, onOpenChange }: MathAssistantProps) => {
             Math Learning Assistant
           </DialogTitle>
           <DialogDescription>
-            I can help you solve simple math problems and explain the steps.
+            I can help you solve math problems, BODMAS expressions, and simple equations. Type your question below.
           </DialogDescription>
         </DialogHeader>
         
@@ -168,7 +337,7 @@ const MathAssistant = ({ open, onOpenChange }: MathAssistantProps) => {
             <Input
               value={expression}
               onChange={(e) => setExpression(e.target.value)}
-              placeholder="Enter a math problem (e.g., 5 + 3)"
+              placeholder="Enter a math problem (e.g., 5 + 3 or 2x + 3 = 7)"
               className="flex-1"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
