@@ -4,7 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Calculator, LucideFunction, Book, School } from "lucide-react";
+import { Brain, Calculator, Function, Book, School } from "lucide-react";
 import MathAssistant from "@/components/ai/MathAssistant";
 
 const AboutPage = () => {
@@ -59,7 +59,7 @@ const AboutPage = () => {
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-dreambox-light-purple text-dreambox-purple">
-                      <LucideFunction className="h-5 w-5" />
+                      <Function className="h-5 w-5" />
                     </div>
                     <div>
                       <h3 className="text-lg font-medium">BODMAS Operations</h3>
