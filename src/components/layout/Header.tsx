@@ -13,12 +13,18 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { BarChart, Menu, X } from "lucide-react";
+import LoginModal from "@/components/auth/LoginModal";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const openLoginModal = () => {
+    setLoginModalOpen(true);
   };
 
   return (
@@ -126,6 +132,7 @@ const Header = () => {
           <Button
             variant="outline"
             className="rounded-full border-dreambox-blue text-dreambox-blue hover:bg-dreambox-blue/10"
+            onClick={openLoginModal}
           >
             Login
           </Button>
@@ -194,6 +201,10 @@ const Header = () => {
             <Button
               variant="outline"
               className="w-full justify-start rounded-full border-dreambox-blue text-dreambox-blue hover:bg-dreambox-blue/10"
+              onClick={() => {
+                setIsMenuOpen(false);
+                openLoginModal();
+              }}
             >
               Login
             </Button>
@@ -205,6 +216,9 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
     </header>
   );
 };
