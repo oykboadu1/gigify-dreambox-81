@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -27,7 +26,7 @@ const HomePage = () => {
           <div className="container grid gap-8 md:grid-cols-2 md:items-center">
             <div className="space-y-6">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                <span className="block text-dreambox-blue">Smart Learning</span>
+                <span className="block text-dreambox-blue">Obiri</span>
                 <span className="block">for Every Student</span>
               </h1>
               <p className="text-lg text-muted-foreground md:text-xl">
