@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -6,22 +7,26 @@ import { BarChart3, Book, Brain, GraduationCap, LineChart, User, Wallet, PieChar
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useToast } from "@/hooks/use-toast";
+import MathAssistant from "@/components/ai/MathAssistant";
 
 const HomePage = () => {
   const { toast } = useToast();
+  const [mathAssistantOpen, setMathAssistantOpen] = useState(false);
   
   const showAIToast = () => {
-    toast({
-      title: "AI Recommendation Engine",
-      description: "We'll analyze your learning patterns to suggest personalized lessons!",
-      duration: 5000,
-    });
+    setMathAssistantOpen(true);
   };
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
+        {/* Math Assistant Dialog */}
+        <MathAssistant 
+          open={mathAssistantOpen} 
+          onOpenChange={setMathAssistantOpen} 
+        />
+
         {/* Hero Section */}
         <section className="hero-gradient py-16 lg:py-24">
           <div className="container grid gap-8 md:grid-cols-2 md:items-center">
