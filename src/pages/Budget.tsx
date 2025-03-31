@@ -17,7 +17,51 @@ import {
   Plus 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { budgetCategories } from "@/services/financeData";
+import { getBudgetCategories } from "@/services/financeData";
+
+// Sample budget data with icons
+const budgetCategories = [
+  {
+    id: 1,
+    name: "Housing",
+    budgeted: 1200,
+    spent: 1150,
+    icon: "home",
+    color: "blue"
+  },
+  {
+    id: 2,
+    name: "Transportation",
+    budgeted: 400,
+    spent: 350,
+    icon: "car",
+    color: "green"
+  },
+  {
+    id: 3,
+    name: "Food",
+    budgeted: 600,
+    spent: 580,
+    icon: "utensils",
+    color: "orange"
+  },
+  {
+    id: 4,
+    name: "Entertainment",
+    budgeted: 200,
+    spent: 180,
+    icon: "film",
+    color: "purple"
+  },
+  {
+    id: 5,
+    name: "Utilities",
+    budgeted: 300,
+    spent: 280,
+    icon: "zap",
+    color: "yellow"
+  }
+];
 
 const Budget = () => {
   // Format currency

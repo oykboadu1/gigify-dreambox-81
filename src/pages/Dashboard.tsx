@@ -22,7 +22,7 @@ import {
   getTotalExpenses, 
   getTotalGoalsProgress, 
   getTotalIncome, 
-  transactions 
+  getAllTransactions
 } from "@/services/financeData";
 
 const Dashboard = () => {
@@ -34,6 +34,7 @@ const Dashboard = () => {
   const goalsProgress = getTotalGoalsProgress();
   const monthlyData = getMonthlyData();
   const expensesByCategory = getExpensesByCategory();
+  const transactions = getAllTransactions();
 
   const recentTransactions = [...transactions]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

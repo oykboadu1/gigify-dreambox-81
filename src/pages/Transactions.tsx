@@ -1,77 +1,34 @@
-
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { 
-  ArrowDownUp, 
-  ChevronDown, 
-  CreditCard, 
-  Filter, 
-  MoreHorizontal, 
-  Search, 
-  TrendingUp 
-} from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CreditCard, Filter, Plus, Search, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Transaction, transactions as allTransactions } from "@/services/financeData";
+import { 
+  getAllTransactions,
+  Transaction,
+  addTransaction
+} from "@/services/financeData";
 
-const Transactions = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState("date");
-  const [sortDirection, setSortDirection] = useState("desc");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-
-  // Get unique categories from transactions
-  const categories = ["all", ...new Set(allTransactions.map((t) => t.category))];
-
-  // Filter and sort transactions
-  const filteredTransactions = allTransactions
-    .filter((transaction) => {
-      // Search filter
-      const matchesSearch = transaction.description
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-      // Type filter
-      const matchesType =
-        typeFilter === "all" || transaction.type === typeFilter;
-
-      // Category filter
-      const matchesCategory =
-        categoryFilter === "all" ||
-        transaction.category.toLowerCase() === categoryFilter.toLowerCase();
-
-      return matchesSearch && matchesType && matchesCategory;
-    })
-    .sort((a, b) => {
-      // Sorting
-      if (sortField === "date") {
-        return sortDirection === "asc"
-          ? new Date(a.date).getTime() - new Date(b.date).getTime()
-          : new Date(b.date).getTime() - new Date(a.date).getTime();
-      } else if (sortField === "amount") {
-        return sortDirection === "asc"
-          ? a.amount - b.amount
-          : b.amount - a.amount;
-      }
-      return 0;
-    });
-
+const TransactionsPage = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>(getAllTransactions());
+  
+  // New transaction form state
+  const [newTransaction, setNewTransaction] = useState({
+    date: new Date().toISOString().slice(0, 10),
+    amount: "",
+    description: "",
+    category: "",
+    type: "expense" as "income" | "expense"
+  });
+  
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -80,178 +37,228 @@ const Transactions = () => {
       minimumFractionDigits: 2,
     }).format(amount);
   };
-
-  // Toggle sort direction
-  const toggleSort = (field: string) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("desc");
+  
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+  
+  // Filter transactions
+  const filteredTransactions = transactions
+    .filter(t => filterType ? t.type === filterType : true)
+    .filter(t => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        t.description.toLowerCase().includes(query) ||
+        t.category.toLowerCase().includes(query) ||
+        formatCurrency(t.amount).includes(query)
+      );
+    });
+  
+  // Add new transaction
+  const handleAddTransaction = () => {
+    // Simple validation
+    if (!newTransaction.description || !newTransaction.amount || !newTransaction.category) {
+      return;
     }
+    
+    const transactionToAdd = {
+      date: newTransaction.date,
+      amount: newTransaction.type === "income" 
+        ? Math.abs(Number(newTransaction.amount)) 
+        : -Math.abs(Number(newTransaction.amount)),
+      description: newTransaction.description,
+      category: newTransaction.category,
+      type: newTransaction.type
+    };
+    
+    const addedTransaction = addTransaction(transactionToAdd);
+    setTransactions([addedTransaction, ...transactions]);
+    
+    // Reset form
+    setNewTransaction({
+      date: new Date().toISOString().slice(0, 10),
+      amount: "",
+      description: "",
+      category: "",
+      type: "expense" as "income" | "expense"
+    });
   };
 
   return (
     <DashboardLayout title="Transactions">
-      <Card>
-        <CardHeader className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-          <CardTitle>Transaction History</CardTitle>
-          <div className="flex flex-wrap gap-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search transactions..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
+      <Card className="col-span-4">
+        <CardHeader>
+          <CardTitle>Transactions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Filters:</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Input
+                type="search"
+                placeholder="Search transactions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="h-5 w-5 text-muted-foreground" />
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="h-8 w-[130px]">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="income">Income</SelectItem>
-                <SelectItem value="expense">Expense</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="h-8 w-[160px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category.toLowerCase()}>
-                    {category === "all"
-                      ? "All Categories"
-                      : category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-auto flex items-center gap-1"
-              onClick={() => toggleSort("date")}
-            >
-              <ArrowDownUp className="h-3.5 w-3.5" />
-              <span>
-                {sortField === "date"
-                  ? `Date: ${sortDirection === "asc" ? "Oldest" : "Newest"}`
-                  : "Sort by Date"}
-              </span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={() => toggleSort("amount")}
-            >
-              <ArrowDownUp className="h-3.5 w-3.5" />
-              <span>
-                {sortField === "amount"
-                  ? `Amount: ${sortDirection === "asc" ? "Low to High" : "High to Low"}`
-                  : "Sort by Amount"}
-              </span>
-            </Button>
+            <div className="flex items-center space-x-4">
+              <Select onValueChange={(value) => setFilterType(value === "all" ? null : value)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Transactions</SelectItem>
+                  <SelectItem value="income">Income</SelectItem>
+                  <SelectItem value="expense">Expense</SelectItem>
+                </SelectContent>
+              </Select>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filters
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Filter Transactions</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    {/* Add filter options here */}
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit">Apply Filters</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
-
-          <div className="rounded-md border">
-            <div className="grid grid-cols-12 border-b bg-muted px-4 py-2 text-sm font-medium">
-              <div className="col-span-6 lg:col-span-5">Description</div>
-              <div className="col-span-2 text-right lg:col-span-2">Amount</div>
-              <div className="col-span-3 hidden lg:block">Category</div>
-              <div className="col-span-3 text-right lg:col-span-1">Date</div>
-              <div className="col-span-1 text-right">Actions</div>
-            </div>
-            <div className="divide-y">
-              {filteredTransactions.length > 0 ? (
-                filteredTransactions.map((transaction) => (
-                  <TransactionRow
-                    key={transaction.id}
-                    transaction={transaction}
-                    formatCurrency={formatCurrency}
-                  />
-                ))
-              ) : (
-                <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  No transactions match your filters
-                </div>
-              )}
-            </div>
+          <div className="mt-4 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Type</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredTransactions.map((transaction) => (
+                  <TableRow key={transaction.id}>
+                    <TableCell>{formatDate(transaction.date)}</TableCell>
+                    <TableCell>{transaction.description}</TableCell>
+                    <TableCell>{transaction.category}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(transaction.amount)}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          transaction.type === "income"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600"
+                        )}
+                      >
+                        {transaction.type}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Transaction
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Transaction</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="date" className="text-right text-sm font-medium leading-none text-right">
+                Date
+              </label>
+              <Input 
+                type="date" 
+                id="date" 
+                className="col-span-3" 
+                value={newTransaction.date}
+                onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="description" className="text-right text-sm font-medium leading-none text-right">
+                Description
+              </label>
+              <Input 
+                type="text" 
+                id="description" 
+                className="col-span-3" 
+                value={newTransaction.description}
+                onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="category" className="text-right text-sm font-medium leading-none text-right">
+                Category
+              </label>
+              <Input 
+                type="text" 
+                id="category" 
+                className="col-span-3" 
+                value={newTransaction.category}
+                onChange={(e) => setNewTransaction({ ...newTransaction, category: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="amount" className="text-right text-sm font-medium leading-none text-right">
+                Amount
+              </label>
+              <Input 
+                type="number" 
+                id="amount" 
+                className="col-span-3" 
+                value={newTransaction.amount}
+                onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="type" className="text-right text-sm font-medium leading-none text-right">
+                Type
+              </label>
+              <Select onValueChange={(value) => setNewTransaction({ ...newTransaction, type: value as "income" | "expense" })}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="income">Income</SelectItem>
+                  <SelectItem value="expense">Expense</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleAddTransaction}>Add Transaction</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
 
-// Transaction Row Component
-interface TransactionRowProps {
-  transaction: Transaction;
-  formatCurrency: (amount: number) => string;
-}
-
-const TransactionRow = ({ transaction, formatCurrency }: TransactionRowProps) => {
-  return (
-    <div className="grid grid-cols-12 items-center px-4 py-3 text-sm">
-      <div className="col-span-6 flex items-center gap-3 lg:col-span-5">
-        <div
-          className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-full",
-            transaction.type === "income"
-              ? "bg-dreambox-light-green text-dreambox-green"
-              : "bg-dreambox-light-orange text-dreambox-orange"
-          )}
-        >
-          {transaction.type === "income" ? (
-            <TrendingUp className="h-4 w-4" />
-          ) : (
-            <CreditCard className="h-4 w-4" />
-          )}
-        </div>
-        <div className="truncate">{transaction.description}</div>
-      </div>
-      <div
-        className={cn(
-          "col-span-2 text-right font-medium lg:col-span-2",
-          transaction.type === "income" ? "text-green-600" : "text-red-600"
-        )}
-      >
-        {transaction.type === "income" ? "+" : "-"}
-        {formatCurrency(transaction.amount)}
-      </div>
-      <div className="col-span-3 hidden truncate text-muted-foreground lg:block">
-        {transaction.category}
-      </div>
-      <div className="col-span-3 text-right text-muted-foreground lg:col-span-1">
-        {new Date(transaction.date).toLocaleDateString()}
-      </div>
-      <div className="col-span-1 text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
-  );
-};
-
-export default Transactions;
+export default TransactionsPage;

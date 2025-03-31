@@ -108,6 +108,11 @@ const transactions = generateTransactions(50);
 const budgetCategories = generateBudgetCategories();
 const goals = generateGoals();
 
+// Export data directly for components that need it
+export const getAllTransactions = () => transactions;
+export const getAllBudgetCategories = () => budgetCategories;
+export const getAllGoals = () => goals;
+
 // Service functions
 export const getTransactions = () => {
   return [...transactions];
@@ -156,7 +161,7 @@ export const updateGoal = (id: string, updates: Partial<Goal>) => {
 };
 
 // Dashboard summary data
-export const getAccountSummary = () => {
+export const getBalance = () => {
   const income = transactions
     .filter(t => t.type === "income")
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -165,15 +170,29 @@ export const getAccountSummary = () => {
     .filter(t => t.type === "expense")
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     
-  return {
-    balance: income - expenses,
-    income,
-    expenses,
-    transactionCount: transactions.length
-  };
+  return income - expenses;
 };
 
-export const getSpendingByCategory = () => {
+export const getTotalIncome = () => {
+  return transactions
+    .filter(t => t.type === "income")
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+};
+
+export const getTotalExpenses = () => {
+  return transactions
+    .filter(t => t.type === "expense")
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+};
+
+export const getTotalGoalsProgress = () => {
+  const totalTarget = goals.reduce((sum, goal) => sum + goal.targetAmount, 0);
+  const totalCurrent = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+  
+  return totalTarget > 0 ? (totalCurrent / totalTarget) * 100 : 0;
+};
+
+export const getExpensesByCategory = () => {
   const categories = new Map<string, number>();
   
   transactions
@@ -183,13 +202,13 @@ export const getSpendingByCategory = () => {
       categories.set(t.category, current + Math.abs(t.amount));
     });
     
-  return Array.from(categories.entries()).map(([name, amount]) => ({
+  return Array.from(categories.entries()).map(([name, value]) => ({
     name,
-    amount
+    value
   }));
 };
 
-export const getIncomeVsExpensesByMonth = () => {
+export const getMonthlyData = () => {
   const monthData = new Map<string, { name: string, income: number, expenses: number }>();
   
   // Get last 6 months
