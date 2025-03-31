@@ -1,5 +1,6 @@
+
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { BarChart, Facebook, Instagram, Twitter, Wallet, Youtube } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -42,6 +43,12 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/dashboard" className="text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1">
+                  <BarChart className="h-4 w-4" />
+                  <span>Finance Dashboard</span>
+                </Link>
+              </li>
+              <li>
                 <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
                   Features
                 </a>
@@ -49,11 +56,6 @@ const Footer = () => {
               <li>
                 <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
                   Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
-                  Testimonials
                 </a>
               </li>
             </ul>

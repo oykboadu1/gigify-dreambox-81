@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { BarChart3, Book, Brain, GraduationCap, LineChart, User } from "lucide-react";
+import { BarChart3, Book, Brain, GraduationCap, LineChart, User, Wallet, PieChart, Target, CreditCard } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -150,8 +150,85 @@ const HomePage = () => {
           </div>
         </section>
 
+        {/* New Section: Finance Dashboard */}
+        <section className="py-16 bg-muted">
+          <div className="container">
+            <div className="mb-12 text-center">
+              <h2 className="mb-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                Take Control of Your Finances
+              </h2>
+              <p className="mx-auto max-w-2xl text-muted-foreground">
+                Our comprehensive financial dashboard gives you powerful tools to track, plan, and optimize your personal finances.
+              </p>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-dreambox-light-blue">
+                    <Wallet className="h-6 w-6 text-dreambox-blue" />
+                  </div>
+                  <h3 className="mb-2 text-xl font-semibold">Track Income & Expenses</h3>
+                  <p className="text-muted-foreground">
+                    Get a complete view of your finances with easy transaction tracking and visualization.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-dreambox-light-purple">
+                    <PieChart className="h-6 w-6 text-dreambox-purple" />
+                  </div>
+                  <h3 className="mb-2 text-xl font-semibold">Plan Your Budget</h3>
+                  <p className="text-muted-foreground">
+                    Create and manage budgets to control spending and increase savings.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-dreambox-light-orange">
+                    <Target className="h-6 w-6 text-dreambox-orange" />
+                  </div>
+                  <h3 className="mb-2 text-xl font-semibold">Set Financial Goals</h3>
+                  <p className="text-muted-foreground">
+                    Define and track progress toward important financial goals and milestones.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-dreambox-light-green">
+                    <CreditCard className="h-6 w-6 text-dreambox-green" />
+                  </div>
+                  <h3 className="mb-2 text-xl font-semibold">Smart Insights</h3>
+                  <p className="text-muted-foreground">
+                    Get personalized recommendations to improve your financial health.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-10 text-center">
+              <Button 
+                asChild
+                size="lg"
+                className="rounded-full bg-dreambox-blue hover:bg-dreambox-blue/90"
+              >
+                <Link to="/dashboard">
+                  <Wallet className="mr-2 h-5 w-5" />
+                  Try Finance Dashboard
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* Featured Gigs */}
-        <section className="bg-muted py-16">
+        <section className="py-16">
           <div className="container">
             <div className="mb-12 flex flex-wrap items-center justify-between gap-4">
               <div>
